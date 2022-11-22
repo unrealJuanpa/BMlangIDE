@@ -416,6 +416,7 @@ while idx < len(code):
             
             split_op_and_add(sent[0])
             twc += f'#l{cmd}:'
+            asm += f'l{cmd}:\n'
 
             clk = 0
             for idx4 in range(idx+1, len(code)):
