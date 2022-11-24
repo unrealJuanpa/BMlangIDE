@@ -94,11 +94,23 @@ def split_op_and_add(sent, level=1):
     sent = sent.replace('-', '#-')
     sent = sent.replace('*', '#*')
     sent = sent.replace('/', '#/')
+    sent = sent.replace('^', '#^')
     sent = sent.replace(';', '')
 
     varnamefinal = sent.split("=")[0].strip()
     ops = sent.split("=")[1].strip()
     ops = ops.split('#')
+
+    ops2 = []
+
+    for idx, i in enumerate(ops):
+        if i.startswith('^'):
+            for p in range(int(i.split('^')[1])-1):
+                ops2.append(f'*{ops[idx-1]}')
+        else:
+            ops2.append(i)
+
+    ops = ops2
 
     if len(ops) == 1:
         twc += f'{tabs}{varnamefinal}={ops[0]};\n'
@@ -139,6 +151,7 @@ def split_op_and_add(sent, level=1):
                 asm += f'\tdiv eax, [{norm}]\n'
             else:
                 asm += f'\tdiv eax, {norm}\n'
+
 
         asm += f'\tmov [{varnamefinal}], eax\n'
     else:
@@ -200,7 +213,7 @@ rules['unsignentero'] = '[0-9]+'
 rules['signentero'] = '(\-|())' + rules['unsignentero']
 rules['letra'] = '[a-zA-Z]'
 rules['identif'] = rules['letra'] + f'(({rules["unsignentero"]})|({rules["letra"]}))*'
-rules['aritoperat'] = '(\+|\-|\*|/)'
+rules['aritoperat'] = '(\+|\-|\*|/|\^)'
 rules['idetifOuint'] = f'({rules["identif"]}|{rules["unsignentero"]})'
 rules['concatAritOpBase'] = f'{rules["0masespacios"]}{rules["aritoperat"]}{rules["0masespacios"]}{rules["idetifOuint"]}'
 rules['operacion'] = f'{rules["idetifOuint"]}({rules["concatAritOpBase"]})*{rules["0masespacios"]}'
@@ -663,7 +676,7 @@ while idx < len(code):
 
 
 asm += 'end start\n'
-asm += f'\tret\n'
+asm += f'ret\n'
 
 #print de codigo intermedio
 
