@@ -437,7 +437,7 @@ while idx < len(code):
             
             split_logop_and_add(sent.replace("WHILE", "").replace("(", "").replace(")", "").strip())
             twc += f'\tif t{tmpvarc-1} goto l{cmd};\n'
-            twc += f'l{cmd+1}:'
+            twc += f'#l{cmd+1}:'
             
             add_asmyo(sent, cmd)
             asm += f'l{cmd+1}:\n'
