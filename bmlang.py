@@ -261,6 +261,59 @@ while idx3 < len(code) - 1:
 
     idx3 += 1
 
+
+def add_asmyo(sent, cmd, invert=False):
+    global asm
+
+    sent = sent.replace("WHILE", "").replace("(", "").replace(")", "").strip()
+    final_asmcmps = []
+    for i in sent.replace("&&", '#&&').replace('||', '#||').split("#"):
+        final_asmcmps.append(i)
+
+    if '==' in final_asmcmps[0]:
+        vj = final_asmcmps[0].replace("==", '#').split('#')
+        asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
+        if invert:
+            asm += f'\tJNE l{cmd}\n'
+        else:
+            asm += f'\tJE l{cmd}\n'
+    elif '<>' in final_asmcmps[0]:
+        vj = final_asmcmps[0].replace("<>", '#').split('#')
+        asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
+        if invert:
+            asm += f'\tJE l{cmd}\n'
+        else:
+            asm += f'\tJNE l{cmd}\n'
+    elif '<=' in final_asmcmps[0]:
+        vj = final_asmcmps[0].replace("<=", '#').split('#')
+        asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
+        if invert:
+            asm += f'\tJG l{cmd}\n'
+        else:
+            asm += f'\tJLE l{cmd}\n'
+    elif '>=' in final_asmcmps[0]:
+        vj = final_asmcmps[0].replace(">=", '#').split('#')
+        asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
+        if invert:
+            asm += f'\tJL l{cmd}\n'
+        else:
+            asm += f'\tJGE l{cmd}\n'
+    elif '<' in final_asmcmps[0]:
+        vj = final_asmcmps[0].replace("<", '#').split('#')
+        asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
+        if invert:
+            asm += f'\tJGE l{cmd}\n'
+        else:
+            asm += f'\tJL l{cmd}\n'
+    elif '>' in final_asmcmps[0]:
+        vj = final_asmcmps[0].replace(">", '#').split('#')
+        asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
+        if invert:
+            asm += f'\tJLE {vj[0]}, {vj[1]}\n'
+        else:
+            asm += f'\tJG {vj[0]}, {vj[1]}\n'
+
+
 code.pop(-1)
 
 mainflag = 0
@@ -330,6 +383,7 @@ while idx < len(code):
                 asm += 'start:\n'
 
             split_logop_and_add(sent.replace("WHILE", "").replace("(", "").replace(")", "").strip())
+            add_asmyo(sent, cmd+1, True)
             twc += f'\tifZ t{tmpvarc-1} goto l{cmd+1};\n'
             twc += f'#l{cmd}:'
             asm += f'l{cmd}:\n'
@@ -372,36 +426,8 @@ while idx < len(code):
             twc += f'\tif t{tmpvarc-1} goto l{cmd};\n'
             twc += f'l{cmd+1}:'
             
-            sent = sent.replace("WHILE", "").replace("(", "").replace(")", "").strip()
-            final_asmcmps = []
-            for i in sent.replace("&&", '#&&').replace('||', '#||').split("#"):
-                final_asmcmps.append(i)
-
-            if '==' in final_asmcmps[0]:
-                vj = final_asmcmps[0].replace("==", '#').split('#')
-                asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
-                asm += f'\tJE l{cmd}\n'
-            elif '<>' in final_asmcmps[0]:
-                vj = final_asmcmps[0].replace("<>", '#').split('#')
-                asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
-                asm += f'\tJNE l{cmd}\n'
-            elif '<=' in final_asmcmps[0]:
-                vj = final_asmcmps[0].replace("<=", '#').split('#')
-                asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
-                asm += f'\tJLE l{cmd}\n'
-            elif '>=' in final_asmcmps[0]:
-                vj = final_asmcmps[0].replace(">=", '#').split('#')
-                asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
-                asm += f'\tJGE l{cmd}\n'
-            elif '<' in final_asmcmps[0]:
-                vj = final_asmcmps[0].replace("<", '#').split('#')
-                asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
-                asm += f'\tJL l{cmd}\n'
-            elif '>' in final_asmcmps[0]:
-                vj = final_asmcmps[0].replace(">", '#').split('#')
-                asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
-                asm += f'\tJG {vj[0]}, {vj[1]}\n'
-
+            add_asmyo(sent, cmd)
+            asm += f'l{cmd+1}:\n'
             
 
             cmd += 1
