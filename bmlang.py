@@ -318,7 +318,6 @@ while idx < len(code):
 
             asm += f'\tmov ah, 02h\n'
             asm += f'\tint 21h\n'
-            asm += f'\tret\n'
 
         elif match(rules['llaveFin'], sent): # cubierto 3w, asm
             mainflag -= 1
@@ -330,6 +329,8 @@ while idx < len(code):
                 asflag = False
                 asm += 'start:\n'
 
+            split_logop_and_add(sent.replace("WHILE", "").replace("(", "").replace(")", "").strip())
+            twc += f'\tifZ t{tmpvarc-1} goto l{cmd+1};\n'
             twc += f'#l{cmd}:'
             asm += f'l{cmd}:\n'
 
@@ -362,7 +363,6 @@ while idx < len(code):
 
                         asm += f'\tmov ah, 02h\n'
                         asm += f'\tint 21h\n'
-                        asm += f'\tret\n'
 
                 if clk == 0:
                     break
@@ -370,6 +370,7 @@ while idx < len(code):
             
             split_logop_and_add(sent.replace("WHILE", "").replace("(", "").replace(")", "").strip())
             twc += f'\tif t{tmpvarc-1} goto l{cmd};\n'
+            twc += f'l{cmd+1}:'
             
             sent = sent.replace("WHILE", "").replace("(", "").replace(")", "").strip()
             final_asmcmps = []
@@ -415,8 +416,11 @@ while idx < len(code):
             sent = [x.strip().replace(';', '') for x in sent]
             
             split_op_and_add(sent[0])
+            split_logop_and_add(sent[1])
+            twc += f'\tifZ t{tmpvarc-1} goto l{cmd+1};\n'
             twc += f'#l{cmd}:'
             asm += f'l{cmd}:\n'
+
 
             clk = 0
             for idx4 in range(idx+1, len(code)):
@@ -448,7 +452,6 @@ while idx < len(code):
 
                         asm += f'\tmov ah, 02h\n'
                         asm += f'\tint 21h\n'
-                        asm += f'\tret\n'
 
                 if clk == 0:
                     break
@@ -457,6 +460,7 @@ while idx < len(code):
             split_op_and_add(sent[2])
             split_logop_and_add(sent[1])
             twc += f'\tif t{tmpvarc-1} goto l{cmd};\n'
+            twc += f'#l{cmd+1}:'
 
 
             sent = sent[1]
@@ -626,6 +630,7 @@ while idx < len(code):
 
 
 asm += 'end start\n'
+asm += f'\tret\n'
 
 #print de codigo intermedio
 
