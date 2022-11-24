@@ -443,6 +443,7 @@ while idx < len(code):
             
             split_op_and_add(sent[0])
             split_logop_and_add(sent[1])
+            add_asmyo(sent[1], cmd+1, True)
             twc += f'\tifZ t{tmpvarc-1} goto l{cmd+1};\n'
             twc += f'#l{cmd}:'
             asm += f'l{cmd}:\n'
@@ -489,6 +490,7 @@ while idx < len(code):
             twc += f'#l{cmd+1}:'
 
 
+            '''
             sent = sent[1]
             final_asmcmps = []
             for i in sent.replace("&&", '#&&').replace('||', '#||').split("#"):
@@ -518,6 +520,11 @@ while idx < len(code):
                 vj = final_asmcmps[0].replace(">", '#').split('#')
                 asm += f'\tcmp {vj[0].strip()}, {vj[1].strip()}\n'
                 asm += f'\tJG {vj[0]}, {vj[1]}\n'
+            '''
+
+            add_asmyo(sent[1], cmd)
+            
+            asm += f'l{cmd+1}:\n'
 
             cmd += 1
             idx = idx4
